@@ -1,0 +1,34 @@
+{
+  "name": "rodrigopedra/laravel-history-navigation",
+  "description": "History navigation inspired by JavaScript's History API",
+  "keywords": [
+    "Laravel",
+    "History",
+    "History navigation"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Rodrigo Pedra Brum",
+      "email": "rodrigo.pedra@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "illuminate/support": "5.4.*",
+    "illuminate/contracts": "5.4.*",
+    "illuminate/http": "5.4.*",
+    "illuminate/routing": "5.4.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "@stable"
+  },
+  "autoload": {
+    "files": [
+      "src/helpers.php"
+    ],
+    "psr-4": {
+      "RodrigoPedra\\": "src/"
+    }
+  }
+}
