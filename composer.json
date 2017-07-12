@@ -26,7 +26,8 @@
   },
   "autoload": {
     "files": [
-      "src/helpers.php"
+      "src/helpers.php",
+      "src/HistoryNavigation/helpers.php"
     ],
     "psr-4": {
       "RodrigoPedra\\": "src/"
