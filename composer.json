@@ -18,7 +18,8 @@
     "illuminate/support": "5.4.*",
     "illuminate/contracts": "5.4.*",
     "illuminate/http": "5.4.*",
-    "illuminate/routing": "5.4.*"
+    "illuminate/routing": "5.4.*",
+    "jakeasmith/http_build_url": "^1"
   },
   "require-dev": {
     "phpunit/phpunit": "@stable"
