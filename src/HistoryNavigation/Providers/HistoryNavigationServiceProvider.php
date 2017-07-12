@@ -32,9 +32,7 @@ class HistoryNavigationServiceProvider extends ServiceProvider
             return new HistoryNavigationService(
                 $this->app[ 'request' ],
                 $this->app[ 'url' ],
-                config( 'navigate-back.default' ),
-                config( 'navigate-back.limit' ),
-                config( 'navigate-back.skip-history', [] )
+                config( 'navigate-back' )
             );
         } );
 
