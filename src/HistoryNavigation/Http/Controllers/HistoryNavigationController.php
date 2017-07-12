@@ -29,6 +29,9 @@ class HistoryNavigationController extends BaseController
         $default  = $request->query( 'default', '/' );
         $previous = $this->urlGenerator->previous( $default );
 
+        $default  = $this->historyService->parseUrl( $default );
+        $previous = $this->historyService->parseUrl( $previous );
+
         $to = $this->historyService->pop( $default );
 
         if ($to === $previous) {

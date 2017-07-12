@@ -39,10 +39,11 @@ class HistoryNavigationService
         UrlGenerator $urlGenerator,
         array $config = []
     ) {
-        $this->history = [];
-
         $this->request      = $request;
         $this->urlGenerator = $urlGenerator;
+
+        $this->history = [];
+
         $this->parseConfig( $config );
     }
 
@@ -112,7 +113,7 @@ class HistoryNavigationService
         return $this;
     }
 
-    private function parseUrl( $url )
+    public function parseUrl( $url )
     {
         $url = $this->urlGenerator->to( $url );
 
