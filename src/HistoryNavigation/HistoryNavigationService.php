@@ -34,11 +34,8 @@ class HistoryNavigationService
     /** @var  array */
     private $ignoreQueryParametersList;
 
-    public function __construct(
-        Request $request,
-        UrlGenerator $urlGenerator,
-        array $config = []
-    ) {
+    public function __construct( Request $request, UrlGenerator $urlGenerator, array $config = [] )
+    {
         $this->request      = $request;
         $this->urlGenerator = $urlGenerator;
 
