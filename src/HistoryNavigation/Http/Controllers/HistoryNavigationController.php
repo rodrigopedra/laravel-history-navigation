@@ -3,6 +3,7 @@
 namespace RodrigoPedra\HistoryNavigation\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Routing\Controller as BaseController;
 use RodrigoPedra\HistoryNavigation\HistoryNavigationService;
@@ -16,12 +17,19 @@ class HistoryNavigationController extends BaseController
     /** @var UrlGenerator */
     private $urlGenerator;
 
-    public function __construct( HistoryNavigationService $historyService, UrlGenerator $urlGenerator )
-    {
+    /** @var Redirector */
+    private $redirector;
+
+    public function __construct(
+        HistoryNavigationService $historyService,
+        UrlGenerator $urlGenerator,
+        Redirector $redirector
+    ) {
         $this->middleware( 'web' );
 
         $this->historyService = $historyService;
         $this->urlGenerator   = $urlGenerator;
+        $this->redirector     = $redirector;
     }
 
     public function back( Request $request )
@@ -34,12 +42,12 @@ class HistoryNavigationController extends BaseController
 
         $to = $this->historyService->pop( $default );
 
-        if ($to === $previous) {
+        while ($to === $previous) {
             $to = $this->historyService->pop( $default );
         }
 
         $request->session()->reflash();
 
-        return redirect()->to( $to )->withInput();
+        return $this->redirector->to( $to )->withInput();
     }
 }

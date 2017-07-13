@@ -34,11 +34,9 @@ class TrackHistoryNavigation
         /** @var \Illuminate\Http\Response $response */
         $response = $next( $request );
 
-        if ($response->isRedirection()) {
-            return $response;
+        if (!$response->isRedirection()) {
+            $this->history->push( $request->fullUrl() );
         }
-
-        $this->history->push( $request->fullUrl() );
 
         $this->history->persist();
 
