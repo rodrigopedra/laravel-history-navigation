@@ -29,12 +29,16 @@ class TrackHistoryNavigation
             return $next( $request );
         }
 
+        if ($request->wantsJson()) {
+            return $next( $request );
+        }
+
         $this->history->boot();
 
         /** @var \Illuminate\Http\Response $response */
         $response = $next( $request );
 
-        if (!$response->isRedirection()) {
+        if ($response->isSuccessful()) {
             $this->history->push( $request->fullUrl() );
         }
 
