@@ -8,9 +8,7 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 
 class HistoryNavigationService
 {
-    const HISTORY_SESSION_KEY  = 'navigation-history.history';
-    const REFERRER_SESSION_KEY = 'navigation-history.referrer';
-    const FRONTEND_SESSION_KEY = 'navigation-history.javascript';
+    const SESSION_KEY = 'navigation-history';
 
     /** @var  Session */
     private $session;
@@ -19,10 +17,7 @@ class HistoryNavigationService
     private $urlGenerator;
 
     /** @var  array */
-    public $history;
-
-    /** @var  array */
-    public $referrer;
+    private $history;
 
     /** @var  string */
     private $defaultUrl;
@@ -58,24 +53,11 @@ class HistoryNavigationService
         return reset( $this->history ) ?: $this->defaultUrl;
     }
 
-    public function previous()
-    {
-        if (count( $this->history ) < 2) {
-            return $this->defaultUrl;
-        }
-
-        return $this->history[ 1 ];
-    }
-
     public function push( $url )
     {
         $url = $this->parseUrl( $url );
 
         if (Str::is( '*/navigate/back', $url )) {
-            return $this;
-        }
-
-        if (Str::is( '*/navigate/sync', $url )) {
             return $this;
         }
 
@@ -123,11 +105,8 @@ class HistoryNavigationService
             return $this;
         }
 
-        $this->history = array_wrap( $this->session->get( self::HISTORY_SESSION_KEY, [] ) );
+        $this->history = array_wrap( $this->session->get( self::SESSION_KEY, [] ) );
         $this->booted  = true;
-
-        $javascriptSessionKey = $this->session->get( self::FRONTEND_SESSION_KEY, str_random() );
-        $this->session->put( self::FRONTEND_SESSION_KEY, $javascriptSessionKey );
 
         return $this;
     }
@@ -139,7 +118,7 @@ class HistoryNavigationService
         }
 
         $this->session->setPreviousUrl( $this->peek() );
-        $this->session->put( self::HISTORY_SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
+        $this->session->put( self::SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
 
         return $this;
     }
@@ -176,7 +155,6 @@ class HistoryNavigationService
     private function parseConfig( array $config = [] )
     {
         $this->defaultUrl = $this->parseUrl( array_get( $config, 'default-url', '/' ) );
-        $this->referrer   = $this->defaultUrl;
 
         $this->limit            = intval( preg_replace( '/\D/', '', array_get( $config, 'limit', 50 ) ) );
         $this->skipPatternsList = array_wrap( array_get( $config, 'skip-patterns', [] ) );

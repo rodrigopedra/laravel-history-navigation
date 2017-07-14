@@ -54,34 +54,4 @@ class HistoryNavigationController extends BaseController
 
         return $this->responseFactory->redirectTo( $to )->withInput();
     }
-
-    public function sync( Request $request )
-    {
-        $this->historyService->boot();
-
-        $current  = $request->get( 'current' );
-        $referrer = $request->get( 'referrer' );
-
-        $current  = $this->historyService->parseUrl( $current );
-        $referrer = $this->historyService->parseUrl( $referrer );
-
-        // window refresh
-        if ($current === $referrer) {
-            return $this->responseFactory->make( $this->historyService->previous(), 200, [
-                'Cache-Control' => 'no-cache',
-            ] );
-        }
-
-        while ($this->historyService->count() && $referrer === $this->historyService->peek()) {
-            $this->historyService->pop();
-        }
-
-        $this->historyService->push( $current );
-
-        $this->historyService->persist();
-
-        return $this->responseFactory->make( $this->historyService->previous(), 200, [
-            'Cache-Control' => 'no-cache',
-        ] );
-    }
 }
