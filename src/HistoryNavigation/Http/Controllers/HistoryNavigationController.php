@@ -52,6 +52,8 @@ class HistoryNavigationController extends BaseController
 
         $request->session()->reflash();
 
-        return $this->responseFactory->redirectTo( $to )->withInput();
+        return $this->responseFactory->redirectTo( $to, 302, [
+            'Cache-Control' => 'no-cache',
+        ] )->withInput();
     }
 }
