@@ -3,21 +3,22 @@
 namespace RodrigoPedra\HistoryNavigation;
 
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Contracts\Routing\UrlGenerator;
 
 class HistoryNavigationService
 {
-    const SESSION_KEY = 'navigation-history';
+    const SESSION_KEY    = 'navigation-history.history';
+    const JAVASCRIPT_KEY = 'navigation-history.javascript';
 
-    /** @var  Request */
-    private $request;
+    /** @var  Session */
+    private $session;
 
     /** @var  UrlGenerator */
     private $urlGenerator;
 
     /** @var  array */
-    private $history;
+    public $history;
 
     /** @var  string */
     private $globalDefault;
@@ -34,12 +35,16 @@ class HistoryNavigationService
     /** @var  array */
     private $ignoreQueryParametersList;
 
-    public function __construct( Request $request, UrlGenerator $urlGenerator, array $config = [] )
+    /** @var  boolean */
+    private $booted;
+
+    public function __construct( UrlGenerator $urlGenerator, Session $session = null, array $config = [] )
     {
-        $this->request      = $request;
+        $this->session      = $session;
         $this->urlGenerator = $urlGenerator;
 
         $this->history = [];
+        $this->booted  = false;
 
         $this->parseConfig( $config );
     }
@@ -53,7 +58,11 @@ class HistoryNavigationService
     {
         $url = $this->parseUrl( $url );
 
-        if (Str::is( '*/navigate/*', $url )) {
+        if (Str::is( '*/navigate/back', $url )) {
+            return $this;
+        }
+
+        if (Str::is( '*/navigate/sync', $url )) {
             return $this;
         }
 
@@ -86,26 +95,38 @@ class HistoryNavigationService
         return $this;
     }
 
+    public function count()
+    {
+        return count( $this->history );
+    }
+
     public function boot()
     {
-        if (!$this->request->hasSession()) {
+        if ($this->booted) {
             return $this;
         }
 
-        $this->history = (array)$this->request->session()->get( self::SESSION_KEY, [] );
+        if (is_null( $this->session )) {
+            return $this;
+        }
+
+        $this->history = array_wrap( $this->session->get( self::SESSION_KEY, [] ) );
+        $this->booted  = true;
+
+        $javascriptSessionKey = $this->session->get( self::JAVASCRIPT_KEY, str_random() );
+        $this->session->put( self::JAVASCRIPT_KEY, $javascriptSessionKey );
 
         return $this;
     }
 
     public function persist()
     {
-        if (!$this->request->hasSession()) {
+        if (is_null( $this->session )) {
             return $this;
         }
 
-        $this->request->session()->setPreviousUrl( $this->peek() );
-
-        $this->request->session()->put( self::SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
+        $this->session->setPreviousUrl( $this->peek() );
+        $this->session->put( self::SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
 
         return $this;
     }
@@ -141,10 +162,10 @@ class HistoryNavigationService
 
         $this->limit = intval( preg_replace( '/\D/', '', array_get( $config, 'limit', 50 ) ) );
 
-        $this->skipPatternsList = (array)array_get( $config, 'skip-patterns', [] );
+        $this->skipPatternsList = array_wrap( array_get( $config, 'skip-patterns', [] ) );
 
         $this->removeEmptyQueryParameters = (bool)array_get( $config, 'query.remove-empty', true );
 
-        $this->ignoreQueryParametersList = (array)array_get( $config, 'query.ignore-parameters', [ 'page' ] );
+        $this->ignoreQueryParametersList = array_wrap( array_get( $config, 'query.ignore-parameters', [ 'page' ] ) );
     }
 }

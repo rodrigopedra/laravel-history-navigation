@@ -3,6 +3,7 @@
 namespace RodrigoPedra\HistoryNavigation\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use RodrigoPedra\HistoryNavigation\HistoryNavigationService;
 
 class TrackHistoryNavigation
@@ -25,11 +26,7 @@ class TrackHistoryNavigation
      */
     public function handle( $request, Closure $next )
     {
-        if (!$request->isMethod( 'GET' )) {
-            return $next( $request );
-        }
-
-        if ($request->wantsJson()) {
+        if ($this->shouldIgnore( $request )) {
             return $next( $request );
         }
 
@@ -45,5 +42,10 @@ class TrackHistoryNavigation
         $this->history->persist();
 
         return $response;
+    }
+
+    private function shouldIgnore( Request $request )
+    {
+        return !$request->isMethod( 'GET' ) || $request->ajax() || $request->wantsJson();
     }
 }

@@ -44,10 +44,44 @@ class HistoryNavigationController extends BaseController
 
         while ($to === $previous) {
             $to = $this->historyService->pop( $default );
+
+            if ($to === $previous && $this->historyService->count() === 0) {
+                $to = $default;
+                break;
+            }
         }
 
         $request->session()->reflash();
 
         return $this->redirector->to( $to )->withInput();
+    }
+
+    public function sync( Request $request )
+    {
+        $this->historyService->boot();
+
+        $referrer = $request->get( 'referrer' );
+
+        $log = [];
+
+        if (!is_null( $referrer )) {
+            $referrer = $this->historyService->parseUrl( $referrer );
+            $previous = $this->historyService->peek();
+
+            while ($referrer === $previous && $this->historyService->count()) {
+                $log[]    = $previous;
+                $previous = $this->historyService->pop();
+            }
+        }
+
+        $current = $request->get( 'current' );
+
+        if (!is_null( $current )) {
+            $this->historyService->push( $current );
+        }
+
+        $this->historyService->persist();
+
+        return 'OK';
     }
 }
