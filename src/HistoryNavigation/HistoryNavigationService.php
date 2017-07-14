@@ -120,8 +120,6 @@ class HistoryNavigationService
         $this->session->setPreviousUrl( $this->peek() );
         $this->session->put( self::SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
 
-        app('log')->info('HISTORY', $this->history);
-
         return $this;
     }
 
