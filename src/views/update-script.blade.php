@@ -1,16 +1,24 @@
 <script>
-    window.onpopstate = function () {
-        var url = '{{ app(\RodrigoPedra\HistoryNavigation\HistoryNavigationService::class)->peek() }}';
-
-        window.history.pushState( url, '', url );
-    };
-
     window.document.addEventListener( 'DOMContentLoaded', function () {
         var SESSION_STORAGE_KEY = '{{session('navigation-history.javascript', str_random())}}';
 
         if ( !window.sessionStorage || !window.XMLHttpRequest || !window.FormData ) {
             return;
         }
+
+        var lastUrl = { url : '{{ request()->fullUrl() }}', loaded : false };
+
+        window.onpopstate = function () {
+            console.log( 'onpopstate', lastUrl );
+
+            if ( lastUrl.loaded ) {
+                window.history && window.history.replaceState( {}, '', lastUrl.url );
+            }
+
+            window.history && window.history.back();
+        };
+
+        window.history && window.history.pushState( {}, '', lastUrl.url );
 
         // @see https://stackoverflow.com/a/11767598/1211472
         var getCookie = function getCookie ( name ) {
@@ -26,7 +34,14 @@
         window.sessionStorage.setItem( SESSION_STORAGE_KEY, current );
 
         var request = new XMLHttpRequest();
-        request.open( 'POST', '{{ route('navigate.sync') }}' );
+
+        var syncHystory = function syncHystory () {
+            lastUrl.url = request.responseText;
+            lastUrl.loaded = true;
+        };
+
+        request.addEventListener( 'load', syncHystory );
+        request.open( 'POST', '{{ route('navigate.sync') }}?_=' + +(new Date()) );
         request.setRequestHeader( 'X-XSRF-TOKEN', getCookie( 'XSRF-TOKEN' ) );
 
         var formData = new FormData();

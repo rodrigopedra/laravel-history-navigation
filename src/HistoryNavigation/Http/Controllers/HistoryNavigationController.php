@@ -3,33 +3,32 @@
 namespace RodrigoPedra\HistoryNavigation\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Redirector;
 use Illuminate\Routing\UrlGenerator;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Routing\Controller as BaseController;
 use RodrigoPedra\HistoryNavigation\HistoryNavigationService;
 
 class HistoryNavigationController extends BaseController
 {
     /** @var HistoryNavigationService */
-
     private $historyService;
 
     /** @var UrlGenerator */
     private $urlGenerator;
 
-    /** @var Redirector */
-    private $redirector;
+    /** @var ResponseFactory */
+    private $responseFactory;
 
     public function __construct(
         HistoryNavigationService $historyService,
         UrlGenerator $urlGenerator,
-        Redirector $redirector
+        ResponseFactory $responseFactory
     ) {
         $this->middleware( 'web' );
 
-        $this->historyService = $historyService;
-        $this->urlGenerator   = $urlGenerator;
-        $this->redirector     = $redirector;
+        $this->historyService  = $historyService;
+        $this->urlGenerator    = $urlGenerator;
+        $this->responseFactory = $responseFactory;
     }
 
     public function back( Request $request )
@@ -53,35 +52,36 @@ class HistoryNavigationController extends BaseController
 
         $request->session()->reflash();
 
-        return $this->redirector->to( $to )->withInput();
+        return $this->responseFactory->redirectTo( $to )->withInput();
     }
 
     public function sync( Request $request )
     {
         $this->historyService->boot();
 
+        $current  = $request->get( 'current' );
         $referrer = $request->get( 'referrer' );
 
-        $log = [];
+        $current  = $this->historyService->parseUrl( $current );
+        $referrer = $this->historyService->parseUrl( $referrer );
 
-        if (!is_null( $referrer )) {
-            $referrer = $this->historyService->parseUrl( $referrer );
-            $previous = $this->historyService->peek();
-
-            while ($referrer === $previous && $this->historyService->count()) {
-                $log[]    = $previous;
-                $previous = $this->historyService->pop();
-            }
+        // window refresh
+        if ($current === $referrer) {
+            return $this->responseFactory->make( $this->historyService->previous(), 200, [
+                'Cache-Control' => 'no-cache',
+            ] );
         }
 
-        $current = $request->get( 'current' );
-
-        if (!is_null( $current )) {
-            $this->historyService->push( $current );
+        while ($this->historyService->count() && $referrer === $this->historyService->peek()) {
+            $this->historyService->pop();
         }
+
+        $this->historyService->push( $current );
 
         $this->historyService->persist();
 
-        return 'OK';
+        return $this->responseFactory->make( $this->historyService->previous(), 200, [
+            'Cache-Control' => 'no-cache',
+        ] );
     }
 }

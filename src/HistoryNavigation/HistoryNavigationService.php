@@ -8,8 +8,9 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 
 class HistoryNavigationService
 {
-    const SESSION_KEY    = 'navigation-history.history';
-    const JAVASCRIPT_KEY = 'navigation-history.javascript';
+    const HISTORY_SESSION_KEY  = 'navigation-history.history';
+    const REFERRER_SESSION_KEY = 'navigation-history.referrer';
+    const FRONTEND_SESSION_KEY = 'navigation-history.javascript';
 
     /** @var  Session */
     private $session;
@@ -20,8 +21,11 @@ class HistoryNavigationService
     /** @var  array */
     public $history;
 
+    /** @var  array */
+    public $referrer;
+
     /** @var  string */
-    private $globalDefault;
+    private $defaultUrl;
 
     /** @var  int */
     private $limit;
@@ -51,7 +55,16 @@ class HistoryNavigationService
 
     public function peek()
     {
-        return reset( $this->history ) ?: $this->globalDefault;
+        return reset( $this->history ) ?: $this->defaultUrl;
+    }
+
+    public function previous()
+    {
+        if (count( $this->history ) < 2) {
+            return $this->defaultUrl;
+        }
+
+        return $this->history[ 1 ];
     }
 
     public function push( $url )
@@ -83,7 +96,7 @@ class HistoryNavigationService
 
     public function pop( $default = '/' )
     {
-        $default = !$default ? $this->globalDefault : $this->urlGenerator->to( $default );
+        $default = !$default ? $this->defaultUrl : $this->urlGenerator->to( $default );
 
         return array_shift( $this->history ) ?: $default;
     }
@@ -110,11 +123,11 @@ class HistoryNavigationService
             return $this;
         }
 
-        $this->history = array_wrap( $this->session->get( self::SESSION_KEY, [] ) );
+        $this->history = array_wrap( $this->session->get( self::HISTORY_SESSION_KEY, [] ) );
         $this->booted  = true;
 
-        $javascriptSessionKey = $this->session->get( self::JAVASCRIPT_KEY, str_random() );
-        $this->session->put( self::JAVASCRIPT_KEY, $javascriptSessionKey );
+        $javascriptSessionKey = $this->session->get( self::FRONTEND_SESSION_KEY, str_random() );
+        $this->session->put( self::FRONTEND_SESSION_KEY, $javascriptSessionKey );
 
         return $this;
     }
@@ -126,13 +139,17 @@ class HistoryNavigationService
         }
 
         $this->session->setPreviousUrl( $this->peek() );
-        $this->session->put( self::SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
+        $this->session->put( self::HISTORY_SESSION_KEY, array_slice( $this->history, 0, $this->limit ) );
 
         return $this;
     }
 
     public function parseUrl( $url )
     {
+        if (is_null( value_or_null( $url ) )) {
+            $url = $this->defaultUrl;
+        }
+
         $url = $this->urlGenerator->to( $url );
 
         $components = parse_url( $url );
@@ -158,14 +175,13 @@ class HistoryNavigationService
 
     private function parseConfig( array $config = [] )
     {
-        $this->globalDefault = $this->parseUrl( array_get( $config, 'default-url', '/' ) );
+        $this->defaultUrl = $this->parseUrl( array_get( $config, 'default-url', '/' ) );
+        $this->referrer   = $this->defaultUrl;
 
-        $this->limit = intval( preg_replace( '/\D/', '', array_get( $config, 'limit', 50 ) ) );
-
+        $this->limit            = intval( preg_replace( '/\D/', '', array_get( $config, 'limit', 50 ) ) );
         $this->skipPatternsList = array_wrap( array_get( $config, 'skip-patterns', [] ) );
 
         $this->removeEmptyQueryParameters = (bool)array_get( $config, 'query.remove-empty', true );
-
-        $this->ignoreQueryParametersList = array_wrap( array_get( $config, 'query.ignore-parameters', [ 'page' ] ) );
+        $this->ignoreQueryParametersList  = array_wrap( array_get( $config, 'query.ignore-parameters', [ 'page' ] ) );
     }
 }
