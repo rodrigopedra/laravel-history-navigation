@@ -6,9 +6,14 @@
             return;
         }
 
-        window.history.pushState( {}, '', window.document.URL );
+        window.history.pushState( {}, '', window.document.location );
 
         window.onpopstate = function () {
+            if ( window.location.hash.length ) {
+                window.history.replaceState( {}, '', window.document.location );
+                return;
+            }
+
             window.location.href = '{{ navigate_back() }}?_=' + (+(new Date()));
         };
     } );
