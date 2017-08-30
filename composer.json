@@ -37,7 +37,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "RodrigoPedra\\HistoryNavigation\\HistoryNavigationService"
+        "RodrigoPedra\\HistoryNavigation\\Providers\\HistoryNavigationServiceProvider"
       ]
     }
   }
