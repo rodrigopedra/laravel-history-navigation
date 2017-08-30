@@ -15,11 +15,11 @@
   ],
   "require": {
     "php": ">=7.0",
-    "illuminate/support": "5.5.*",
-    "illuminate/contracts": "5.5.*",
-    "illuminate/http": "5.5.*",
-    "illuminate/routing": "5.5.*",
-    "illuminate/auth": "5.5.*",
+    "illuminate/support": "^5.5",
+    "illuminate/contracts": "^5.5",
+    "illuminate/http": "^5.5",
+    "illuminate/routing": "^5.5",
+    "illuminate/auth": "^5.5",
     "jakeasmith/http_build_url": "^1"
   },
   "require-dev": {
@@ -31,7 +31,14 @@
       "src/HistoryNavigation/helpers.php"
     ],
     "psr-4": {
-      "RodrigoPedra\\": "src/"
+      "RodrigoPedra\\HistoryNavigation\\": "src/HistoryNavigation/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "RodrigoPedra\\HistoryNavigation\\HistoryNavigationService"
+      ]
     }
   }
 }
