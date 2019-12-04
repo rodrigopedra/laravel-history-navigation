@@ -11,7 +11,7 @@ class TrackHistoryNavigation
     /** @var HistoryNavigationService */
     private $history;
 
-    public function __construct( HistoryNavigationService $historyService )
+    public function __construct(HistoryNavigationService $historyService)
     {
         $this->history = $historyService;
     }
@@ -19,24 +19,23 @@ class TrackHistoryNavigation
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure                 $next
-     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
      * @return mixed
      */
-    public function handle( $request, Closure $next )
+    public function handle($request, Closure $next)
     {
-        if ($this->shouldIgnore( $request )) {
-            return $next( $request );
+        if ($this->shouldIgnore($request)) {
+            return $next($request);
         }
 
         $this->history->boot();
 
         /** @var \Illuminate\Http\Response $response */
-        $response = $next( $request );
+        $response = $next($request);
 
         if ($response->isSuccessful()) {
-            $this->history->push( $request->fullUrl() );
+            $this->history->push($request->fullUrl());
         }
 
         $this->history->persist();
@@ -44,8 +43,8 @@ class TrackHistoryNavigation
         return $response;
     }
 
-    private function shouldIgnore( Request $request )
+    private function shouldIgnore(Request $request)
     {
-        return !$request->isMethod( 'GET' ) || $request->ajax() || $request->wantsJson();
+        return ! $request->isMethod('GET') || $request->ajax() || $request->wantsJson();
     }
 }

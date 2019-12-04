@@ -2,10 +2,10 @@
 
 namespace RodrigoPedra\HistoryNavigation\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Routing\UrlGenerator;
 use RodrigoPedra\HistoryNavigation\HistoryNavigationService;
 
 class HistoryNavigationController extends BaseController
@@ -24,25 +24,25 @@ class HistoryNavigationController extends BaseController
         UrlGenerator $urlGenerator,
         ResponseFactory $responseFactory
     ) {
-        $this->middleware( 'web' );
+        $this->middleware('web');
 
-        $this->historyService  = $historyService;
-        $this->urlGenerator    = $urlGenerator;
+        $this->historyService = $historyService;
+        $this->urlGenerator = $urlGenerator;
         $this->responseFactory = $responseFactory;
     }
 
-    public function back( Request $request )
+    public function back(Request $request)
     {
-        $default  = $request->query( 'default', '/' );
-        $previous = $this->urlGenerator->previous( $default );
+        $default = $request->query('default', '/');
+        $previous = $this->urlGenerator->previous($default);
 
-        $default  = $this->historyService->parseUrl( $default );
-        $previous = $this->historyService->parseUrl( $previous );
+        $default = $this->historyService->parseUrl($default);
+        $previous = $this->historyService->parseUrl($previous);
 
-        $to = $this->historyService->pop( $default );
+        $to = $this->historyService->pop($default);
 
         while ($to === $previous) {
-            $to = $this->historyService->pop( $default );
+            $to = $this->historyService->pop($default);
 
             if ($to === $previous && $this->historyService->count() === 0) {
                 $to = $default;
@@ -52,8 +52,8 @@ class HistoryNavigationController extends BaseController
 
         $request->session()->reflash();
 
-        return $this->responseFactory->redirectTo( $to, 302, [
+        return $this->responseFactory->redirectTo($to, 302, [
             'Cache-Control' => 'no-cache',
-        ] )->withInput();
+        ])->withInput();
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'default-url'   => '/',
+    'default-url' => '/',
     'history-limit' => 50,
     'skip-patterns' => [],
-    'query'         => [
-        'remove-empty'      => true,
-        'ignore-parameters' => [ 'page' ],
+    'query' => [
+        'remove-empty' => true,
+        'ignore-parameters' => ['page'],
     ],
 ];
