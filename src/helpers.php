@@ -6,7 +6,7 @@
  */
 function navigate_back($default = '/')
 {
-    return route('navigate.back', compact('default'));
+    return route('navigate.back', ['default' => $default]);
 }
 
 /**
@@ -19,5 +19,5 @@ function navigate_default($default = '/')
         return $default;
     }
 
-    return route('navigate.back', compact('default'));
+    return route('navigate.back', ['default' => $default]);
 }

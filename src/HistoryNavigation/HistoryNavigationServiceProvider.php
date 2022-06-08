@@ -1,10 +1,9 @@
 <?php
 
-namespace RodrigoPedra\HistoryNavigation\Providers;
+namespace RodrigoPedra\HistoryNavigation;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use RodrigoPedra\HistoryNavigation\HistoryNavigationService;
 use RodrigoPedra\HistoryNavigation\Http\Middleware\TrackHistoryNavigation;
 
 class HistoryNavigationServiceProvider extends ServiceProvider
@@ -16,10 +15,11 @@ class HistoryNavigationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->loadRoutesFrom(__DIR__ . '/../../routes.php');
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
         $this->loadViewsFrom(__DIR__ . '/../../views', 'history-navigation');
 
-        $this->publishes([__DIR__ . '/../../config.php' => config_path('navigate-back.php')]);
+        $configPath = $this->app['path.config'] . DIRECTORY_SEPARATOR . 'navigate-back.php';
+        $this->publishes([__DIR__ . '/../../config/navigate-back.php' => $configPath]);
 
         $this->listenToAuthEvents();
     }
@@ -31,7 +31,7 @@ class HistoryNavigationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../../config.php', 'navigate-back');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/navigate-back.php', 'navigate-back');
 
         $this->app->singleton(HistoryNavigationService::class, function () {
             return new HistoryNavigationService(

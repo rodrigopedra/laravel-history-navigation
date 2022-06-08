@@ -13,17 +13,11 @@ if (! function_exists('value_or_null')) {
     {
         $value = value($value);
 
-        if (is_object($value)) {
-            return $value;
+        if (is_string($value)) {
+            $value = trim($value);
         }
 
-        if (is_array($value)) {
-            return empty($value) ? null : $value;
-        }
-
-        $value = trim($value);
-
-        if (empty($value) || ! $value) {
+        if (blank($value)) {
             return null;
         }
 
