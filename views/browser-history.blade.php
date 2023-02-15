@@ -14,7 +14,7 @@ window.document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        window.location.href = '{{ navigate_back() }}?_=' + (+(new Date()));
+        window.location.href = '{{ navigate_back() }}?_=' + Date.now();
     };
 });
 </script>

@@ -1,6 +1,8 @@
 <?php
 
-\Route::get('/navigate/back', [
-    'uses' => 'RodrigoPedra\\HistoryNavigation\\Http\\Controllers\\HistoryNavigationController@back',
-    'as' => 'navigate.back',
-]);
+use Illuminate\Support\Facades\Route;
+use RodrigoPedra\HistoryNavigation\Http\Controllers\HistoryNavigationController;
+
+Route::get('/navigate/back', HistoryNavigationController::class)
+    ->middleware(['web'])
+    ->name('navigate.back');
