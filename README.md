@@ -29,8 +29,33 @@ On a view you can use the `navigate_back()` helper as the `href` of a a back lin
 
 The parameter is a default destination, in case the history is empty.
 
-There is also the `navigate_default()` helper, which redirects to the default route 
-defined as its parameter, or defers to `navigate_back()` when this parameter is not present.
+There is also the `navigate_default()` helper. It will check if a `use_default` query parameter is present 
+in the request, if so it will try to redirect to the default route defined as its parameter.
+If the query parameter is not present it will defer to `navigate_back()`.
+
+## Configuration
+
+You can publish the configuration by running 
+
+```bash
+php artisan vendor:publish --provider=RodrigoPedra\\HistoryNavigation\\HistoryNavigationServiceProvider
+``` 
+
+You should now have a file called `navigate-back.php` under your config folder. Below are the default values:
+
+```php
+<?php
+
+return [
+    'default-url' => '/',
+    'history-limit' => 50,
+    'skip-patterns' => [],
+    'query' => [
+        'remove-empty' => true,
+        'ignore-parameters' => ['page'],
+    ],
+];
+```
 
 ## Caveats
 
