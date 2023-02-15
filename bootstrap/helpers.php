@@ -12,10 +12,8 @@ function navigate_back(string $default = '/'): string
 
 function navigate_default(string $default = '/'): string
 {
-    $request = Container::getInstance()->make(Request::class);
-
-    if ($request->query->has('use_default')) {
-        return $default;
+    if (\request()->query->has('use_default')) {
+        return \url($default);
     }
 
     return \navigate_back($default);
