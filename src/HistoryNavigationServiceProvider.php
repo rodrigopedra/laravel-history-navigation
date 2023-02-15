@@ -58,12 +58,12 @@ class HistoryNavigationServiceProvider extends ServiceProvider
 
         $router->pushMiddlewareToGroup('web', TrackHistoryNavigation::class);
 
-        $events->listen(Login::class, function (Container $container) {
-            $container->make(HistoryNavigationService::class)->clear()->persist();
+        $events->listen(Login::class, function () {
+            $this->app->make(HistoryNavigationService::class)->clear()->persist();
         });
 
-        $events->listen(Logout::class, static function (Container $container) {
-            $container->make(HistoryNavigationService::class)->clear()->persist();
+        $events->listen(Logout::class, static function () {
+            $this->app->make(HistoryNavigationService::class)->clear()->persist();
         });
     }
 }
