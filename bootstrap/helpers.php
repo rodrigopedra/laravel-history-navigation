@@ -2,7 +2,6 @@
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Http\Request;
 
 function navigate_back(string $default = '/'): string
 {
