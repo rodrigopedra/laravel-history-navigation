@@ -19,16 +19,11 @@ class TrackHistoryNavigation
             return $next($request);
         }
 
-        /** @var \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse $response */
-        $response = $next($request);
-
-        if ($response->isSuccessful()) {
-            $this->historyService->push($request->fullUrl());
-        }
-
-        $this->historyService->persist();
-
-        return $response;
+        return \tap($next($request), function (Response|RedirectResponse $response) use ($request) {
+            if ($response->isSuccessful()) {
+                $this->historyService->push($request->fullUrl())->persist();
+            }
+        });
     }
 
     private function shouldIgnore(Request $request): bool

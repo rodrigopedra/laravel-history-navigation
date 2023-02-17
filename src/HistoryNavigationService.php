@@ -26,12 +26,12 @@ final class HistoryNavigationService
         $this->limit = \max(1, $limit);
         $this->history = new \SplQueue();
 
-        $history = $this->session?->get(self::SESSION_KEY, []) ?? [];
+        $history = $this->session?->get(self::SESSION_KEY) ?? [];
         $history = Arr::flatten(Arr::wrap($history));
 
         foreach ($history as $entry) {
             if (\filter_var($entry, FILTER_VALIDATE_URL) !== false) {
-                $this->history->push($entry);
+                $this->push($entry);
             }
         }
     }
@@ -63,27 +63,27 @@ final class HistoryNavigationService
         return $this;
     }
 
-    public function pop(?string $default = '/'): string
+    public function pop(?string $default = null): string
     {
         if ($this->history->isEmpty()) {
-            return $this->parseUrl($default ?? '/');
+            return $this->parseUrl($default);
         }
 
         return $this->history->pop();
     }
 
-    public function peek(?string $default = '/'): string
+    public function peek(?string $default = null): string
     {
         if ($this->history->isEmpty()) {
-            return $this->parseUrl($default ?? '/');
+            return $this->parseUrl($default);
         }
 
         return $this->history->top();
     }
 
-    public function previous(?string $default = '/'): string
+    public function previous(?string $default = null): string
     {
-        $default = $this->parseUrl($default ?? '/');
+        $default = $this->parseUrl($default);
 
         $previous = $this->url->previous($default);
         $previous = $this->parseUrl($previous);
